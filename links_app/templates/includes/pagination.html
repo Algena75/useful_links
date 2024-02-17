@@ -1,0 +1,46 @@
+        <!-- Navigation section for pagination controls -->
+        <nav aria-label="Page navigation example">
+            <ul class="pagination pagination-sm">
+                <!-- Check if there is a previous page -->
+                {% if pagination.has_prev %}
+                <li class="page-item">
+                    <!-- If there is, create a link to the previous page -->
+                    <a class="page-link" href="/?page={{ pagination.prev_num }}">Previous</a>
+                </li>
+                {% else %}
+                <!-- If not, show a disabled 'Previous' button -->
+                <li class="page-item disabled"><span class="page-link">Previous</span></li>
+                {% endif %}
+
+                <!-- Loop through each page number provided by pagination.iter_pages() -->
+                {% for page_num in pagination.iter_pages() %}
+                <!-- Check if the page number exists (not None) -->
+                {% if page_num %}
+                <!-- Check if the current page is not the active page -->
+                {% if page_num != pagination.page %}
+                <!-- Create a clickable link for the page number -->
+                <li class="page-item"><a class="page-link" href="/?page={{ page_num }}">{{ page_num }}</a></li>
+                {% else %}
+                <!-- Highlight the current page as active and not clickable -->
+                <li class="page-item active" aria-current="page">
+                    <span class="page-link">{{ page_num }}</span>
+                </li>
+                {% endif %}
+                {% else %}
+                <!-- For gaps in the pagination links, show ellipsis -->
+                <li class="page-item disabled"><span class="page-link">...</span></li>
+                {% endif %}
+                {% endfor %}
+
+                <!-- Check if there is a next page -->
+                {% if pagination.has_next %}
+                <li class="page-item">
+                    <!-- If there is, create a link to the next page -->
+                    <a class="page-link" href="/?page={{ pagination.next_num }}">Next</a>
+                </li>
+                {% else %}
+                <!-- If not, show a disabled 'Next' button -->
+                <li class="page-item disabled"><span class="page-link">Next</span></li>
+                {% endif %}
+            </ul>
+        </nav>

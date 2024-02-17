@@ -1,0 +1,22 @@
+    <table class="table table-striped">
+      <tr><th>Tags</th><th>Description</th><th>Language</th><th>Link</th></tr>
+      {% for link in links %}
+        <tr>
+          <td>
+            {% if link.tags %}
+              {% for tag in link.tags %}
+                <a class="btn {% if tag.is_active %}btn-is_active-primary{% else %}btn-outline-primary{% endif %} btn-sm" 
+                    href="{{ url_for('change_tag_status', tag_name=tag.name) }}" >{{ tag.name }}</a>
+              {% endfor %}
+            {% endif %}
+          </td>
+          <td>{{ link.text }}</td>
+          <td>{{ link.lang }}</td>
+          <td>
+            <a class="link-warning link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover fs-6" href="{{ url_for('redirect_func', short_url=link.short, _external=True) }}" target="_blank">
+              {{ url_for('redirect_func', short_url=link.short, _external=True) }}
+            </a>
+          </td>
+        </tr>
+      {% endfor %}
+    </table>

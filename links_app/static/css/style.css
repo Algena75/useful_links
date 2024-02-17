@@ -1,0 +1,96 @@
+@font-face {
+    font-family: "Montserrat";
+    src: local("Montserrat"),
+      url(../fonts/Montserrat/Montserrat-VariableFont_wght.ttf);
+  }
+
+body {
+    font-family: Montserrat, Arial, sans-serif;
+    background-color: #F9F9F9;
+    line-height: 1.2;
+    letter-spacing: 0.01em;
+    color: #272727;
+}
+p, a {
+    font-size: 16px;
+}
+
+a.nav-link, a {
+    color: #272727;
+
+}
+
+a.nav-link:hover, a:hover {
+    color: blue;
+}
+.nav-pills a.nav-link.active {
+    background-color: blue;
+    border-radius: 16px;
+}
+
+h4 {
+    font-size: 20px;
+}
+
+p.small {
+    font-size: 18px;
+    color: #8E8E8E;
+}
+.form-control-lg {
+    border-radius: 20px;
+
+}
+
+.form-control:focus {
+    background-color: #FFF;
+    border-color: blue;
+    outline: 0;
+  }
+
+textarea {
+    resize: none;
+}
+
+.button {
+    background-color: #006bd6;
+    border-radius: 20px;
+    color: #FFF;
+    font-size: 16px;
+}
+
+.button:hover {
+    background-color: blue;
+    color: #FFF;
+}
+
+.btn-outline-primary {
+    background-color: white;
+    border-radius: 20px;
+    color: blue;
+    font-size: 10;
+}
+
+.btn-is_active-primary {
+    background-color: #006bd6;
+    border-radius: 20px;
+    color: white;
+    font-size: 10;
+}
+
+.btn-is_active-primary:hover {
+    background-color: blue;
+    color: #FFF;
+}
+
+
+@media (max-width: 600px) {
+    p {
+        text-align: justify;
+    }
+    h1 {
+        text-align: center;
+    }
+    .navbar-brand {
+        margin: 0 auto;
+    }
+}

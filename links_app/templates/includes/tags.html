@@ -1,0 +1,11 @@
+<div class="row row-cols-lg-auto">
+  <h4>Фильтр</h4>
+  <div class="col-12">
+    {% for tag in tags %}
+      <a class="btn {% if tag.is_active %}btn-is_active-primary{% else %}btn-outline-primary{% endif %} btn-sm" 
+      href="{{ url_for('change_tag_status', tag_name=tag.name) }}" >{{ tag.name }}</a>
+    {% endfor %}
+  </div>
+  <div class="col-12">
+  </div>
+</div>

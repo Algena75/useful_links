@@ -1,0 +1,50 @@
+<div class="card-header">
+          <h5 class="card-title">Добавить ссылку</h5>
+</div>
+    <div class="card-body">
+<form method="POST" action="{{ url_for('index_view') }}"  novalidate>
+    {{ form.csrf_token }}
+    <div class="col-12">
+      
+    </div>
+            <div class="col-12">
+      {{ form.link_tags(class="form-control py-1 mb-1", placeholder=form.link_tags.label.text) }}
+    </div>
+    <div class="col-12">
+        {% if form.link_tags.errors %}
+          {% for error in form.link_tags.errors %}
+            <span style="color: red">{{ error }}</span>
+          {% endfor %}
+        {% endif %}
+    </div>
+    <div class="col-12">
+      {{ form.original_link(class="form-control py-1 mb-1", placeholder=form.original_link.label.text) }}
+    </div>
+    <div class="col-12">
+      {{ form.link_description(class="form-control py-1 mb-1", placeholder=form.link_description.label.text, rows="3")}}
+        {% if form.link_description.errors %}
+          {% for error in form.link_description.errors %}
+            <span style="color: red">{{ error }}</span>
+          {% endfor %}
+        {% endif %}
+    </div>
+    <div class="col-12">
+      {{ form.custom_id(class="form-control py-1 mb-1", placeholder=form.custom_id.label.text) }}
+    </div>
+    <div class="col-12">
+      {{ form.text_lang(class="form-control py-1 mb-1", placeholder=form.text_lang.label.text) }}
+    </div>
+    <div class="col-12">
+      {{ form.submit_1(class="btn button") }}
+    </div>
+  </form>
+  <p class="py-1 mb-1">
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        {% for message in messages %}
+          {{ message }}
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+  </p>
+    </div>

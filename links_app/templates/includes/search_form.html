@@ -1,0 +1,12 @@
+<form action="{{ url_for('search') }}" id="search_form" method=POST class=form-horizontal>
+    <div class="row row-cols-lg-auto">
+      <h4>Поиск</h4>
+      <div class="col-12">
+        {{ search_form.search_string(class="form-control py-1 mb-1", placeholder=search_form.search_string.label.text) }}
+      </div>
+      <div class="col-12">
+        {{ search_form.submit_2(class="btn button") }}
+      </div>
+
+    </div>
+</form>
