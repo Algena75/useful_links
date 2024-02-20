@@ -2,6 +2,8 @@ from flask_wtf import FlaskForm
 from wtforms import SelectField, StringField, SubmitField, URLField, TextAreaField, SearchField
 from wtforms.validators import URL, DataRequired, Length, Optional, Regexp
 
+from .utils import LANG_CHOICES
+
 PATTERN = r'^[0-9A-Za-z]+$'
 
 
@@ -26,7 +28,7 @@ class AddLinkForm(FlaskForm):
     )
     text_lang = SelectField(
         'Язык текста',
-        choices=[('RU', 'rus'), ('EN', 'eng')]
+        choices=LANG_CHOICES
     )
     submit_1 = SubmitField('Добавить')
 

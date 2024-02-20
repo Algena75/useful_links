@@ -1,9 +1,10 @@
-from flask import abort, flash, redirect, render_template, url_for, request
+from flask import abort, flash, redirect, render_template, request, url_for
 
 from . import app, db
-from .models import Link, Tag
 from .forms import AddLinkForm, SearchForm
-from .utils import create_new_link, get_unique_short_id
+from .models import Link, Tag
+from .utils import change_tag_is_active, create_new_link
+from .validators import validate_form
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -20,21 +21,8 @@ def index_view():
         )
     form = AddLinkForm()
     search_form = SearchForm()
-    wrong = False
     if form.submit_1.data and form.validate():
-        if Link.query.filter_by(original=form.original_link.data).first():
-            flash('Такая ссылка уже есть!')
-            wrong = True
-        if Link.query.filter_by(text=form.link_description.data).first():
-            flash('Такое описание уже есть!')
-            wrong = True
-        if form.custom_id.data and form.custom_id.data.strip() != '':
-            short_url = form.custom_id.data
-            if Link.query.filter_by(short=short_url).first() is not None:
-                flash(f'Имя {short_url} уже занято!')
-                wrong = True
-        else:
-            form.custom_id.data = get_unique_short_id()
+        form, wrong = validate_form(form)
         if not wrong:
             create_new_link(form)
             return redirect(url_for('index_view'))
@@ -56,9 +44,7 @@ def redirect_func(short_url):
 
 @app.route('/tag/<tag_name>')
 def change_tag_status(tag_name):
-    tag_to_change = Tag.query.filter_by(name=tag_name).first_or_404()
-    tag_to_change.is_active = True if not tag_to_change.is_active else False
-    db.session.commit()
+    change_tag_is_active(tag_name)
     return redirect(url_for('index_view'))
 
 

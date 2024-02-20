@@ -1,8 +1,11 @@
+import operator
 import re
 from http import HTTPStatus
+from flask import flash
 
 from .error_handlers import InvalidAPIUsage
-from .utils import ARRAY
+from .models import Link, Tag
+from .utils import get_unique_short_id, ARRAY, LANG_CHOICES
 
 
 def validate_hostname(hostname):
@@ -63,3 +66,53 @@ def validate_custom_id(short_id):
                 status_code=HTTPStatus.BAD_REQUEST
             )
     return short_id
+
+
+def validate_link(data):
+    if data is None:
+        raise InvalidAPIUsage('Отсутствует тело запроса')
+    if 'original_url' not in data:
+        raise InvalidAPIUsage('\"original_url\" является обязательным полем!')
+    data['original_url'] = validate_url(data['original_url'])
+    if 'description' not in data:
+        raise InvalidAPIUsage('\"description\" является обязательным полем!')
+    if data.get('language'):
+        if data.get('language') not in list(operator.concat(*LANG_CHOICES)):
+            raise InvalidAPIUsage(
+                f'Язык должен быть из списка {LANG_CHOICES}'
+            )
+    else:
+        data['language'] = 'RU'
+    if data.get('short_link'):
+        short_id = validate_custom_id(data.get('short_link'))
+        if Link.query.filter_by(short=short_id).first() is not None:
+            raise InvalidAPIUsage(f'Имя "{short_id}" уже занято.')
+    else:
+        data['short_link'] = get_unique_short_id()
+    if not data.get('tags'):
+        data['tags'] = ['Python']
+    return data
+
+
+def validate_search_string(search_string):
+    if not search_string or search_string.strip() == '':
+        raise InvalidAPIUsage('Строка поиска не может быть пустой')
+    return search_string
+
+
+def validate_form(form):
+    wrong = False
+    if Link.query.filter_by(original=form.original_link.data).first():
+        flash('Такая ссылка уже есть!')
+        wrong = True
+    if Link.query.filter_by(text=form.link_description.data).first():
+        flash('Такое описание уже есть!')
+        wrong = True
+    if form.custom_id.data and form.custom_id.data.strip() != '':
+        short_url = form.custom_id.data
+        if Link.query.filter_by(short=short_url).first() is not None:
+            flash(f'Имя {short_url} уже занято!')
+            wrong = True
+    else:
+        form.custom_id.data = get_unique_short_id()
+    return form, wrong
