@@ -25,7 +25,9 @@ def add_record():
             links = Link.to_collection_dict(
                 Link.query, page, per_page, '.add_record'
             )
-        return jsonify(links), 200
+        if not links:
+            raise InvalidAPIUsage('Записей не найдено', HTTPStatus.NOT_FOUND)
+        return jsonify(links), HTTPStatus.OK
     data = request.get_json()
     data = validate_link(data)
     new_record = Link(
@@ -73,7 +75,7 @@ def get_tags():
     return jsonify({'tags': [item.to_dict() for item in Tag.query.all()]})
 
 
-@app.route('/api/tags/<tag_name>/', methods=['GET'])
+@app.route('/api/tags/<tag_name>/', methods=['POST'])
 def api_change_tag_status(tag_name):
     tag_to_change = change_tag_is_active(tag_name)
     return jsonify(tag_to_change.to_dict()), HTTPStatus.OK
@@ -88,5 +90,6 @@ def search_func(search_string):
         Link.query.filter(Link.text.contains(search_string)),
         page, per_page, '.search_func', search=search_string
     )
-    return jsonify(links), 200
-
+    if not links:
+        raise InvalidAPIUsage('Записей не найдено', HTTPStatus.NOT_FOUND)
+    return jsonify(links), HTTPStatus.OK

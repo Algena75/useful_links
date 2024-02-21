@@ -70,3 +70,8 @@ def search():
         found=found,
         tags=Tag.query.all()
     )
+
+@app.route('/api/docs')
+def get_docs():
+    print('sending docs')
+    return render_template('swaggerui.html')

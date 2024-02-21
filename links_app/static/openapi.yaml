@@ -1,0 +1,333 @@
+openapi: 3.0.3
+info:
+  title: Проект Useful Links
+  description: API сервис хранения и обработки ссылок с фильтрацией и поиском по строке.
+  version: 0.1.0
+tags:
+  - name: link
+    description: Операции со ссылками
+  - name: tag
+    description: Операции с тегами
+paths:
+  /api/:
+    post:
+      tags:
+        - link
+      parameters:
+        - name: tags
+          in: query
+          description: Введите теги через запятую
+          required: false
+          schema:
+            type: string
+        - name: original_url
+          in: query
+          description: Введите уникальный url
+          required: true
+          schema:
+            type: string
+        - name: description
+          in: query
+          description: Описание ссылки
+          required: true
+          schema:
+            type: string
+        - name: short_link
+          in: query
+          description: Введите уникальный идентификатор
+          required: false
+          schema:
+            type: string
+        - name: language
+          in: query
+          description: Введите язык ресурса
+          required: true
+          schema:
+            enum: ['rus', 'eng']
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/create_link'
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Пустой запрос:
+                  value:
+                    message: Отсутствует тело запроса
+                Недопустимый короткий идентификатор:
+                  value:
+                    message: "Указано недопустимое имя для короткой ссылки"
+                Недопустимая ссылка:
+                  value:
+                    message: "Неправильный URL"
+                Отсутствует обязательное поле:
+                  value:
+                    message: '"original url" является обязательным полем!'
+          description: Not found
+      summary: Create link
+    get:
+      tags:
+        - link
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              
+              schema:
+                $ref: '#/components/schemas/get_links'
+          description: Successful response
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                message: Ничего не найдено
+          description: Not found
+      summary: Get links
+
+  /api/search/{search_string}/:
+    get:
+      tags:
+        - link
+      parameters:
+        - in: path
+          name: search_string
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              
+              schema:
+                $ref: '#/components/schemas/search_links'
+          description: Successful response
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                message: Ничего не найдено
+          description: Not found
+      summary: Search string
+
+  /api/{short_id}/:
+    get:
+      tags:
+        - link
+      parameters:
+        - in: path
+          name: short_id
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/get_url'
+          description: Successful response
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Несуществующий id:
+                  value:
+                    message: Указанный id не найден
+          description: Not found
+      summary: Get Url
+
+  /api/links/{link_id}:
+    delete:
+      tags:
+        - link
+      parameters:
+        - in: path
+          name: link_id
+          schema:
+            type: integer
+          required: true
+      responses:
+        '204':
+          description: Successful deletion
+        '404':
+          description: Not found
+      summary: Delete link
+
+  /api/tags/:
+    get:
+      tags:
+        - tag
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/get_tags'
+          description: Successful response
+        '404':
+          description: Not found
+      summary: Get tags
+
+  /api/tags/{tag_name}:
+    post:
+      tags:
+        - tag
+      parameters:
+        - name: tag_name
+          in: path
+          required: true
+          description: Имя тега
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tag'
+          description: Successful response
+        '404':
+          description: Not found
+      summary: Change tag status
+
+components:
+  schemas:
+    Error:
+      properties:
+        message:
+          type: string
+      type: object
+    get_url:
+      properties:
+        original_url:
+          type: string
+      type: object
+      description: Получение ссылки по идентификатору
+    create_link:
+      properties:
+        id:
+          type: integer
+        tags:
+          type: array
+          items:
+            type: string
+            example: 'Django'
+        original_url:
+          type: string
+          example: 'https://www.djangoproject.com/'
+        description:
+          type: string
+          example: 'Django: The web framework for perfectionists with deadlines'
+        short_link:
+          type: string
+          example: django
+        language:
+          type: string
+          example: 'eng'
+      type: object
+      description: Генерация новой ссылки
+    get_links:
+      properties:
+        _filters:
+          type: array
+          items:
+            type: string
+            example: 'Django'
+        count:
+          type: integer
+        next:
+          type: string
+        prev:
+          type: string
+        results:
+          type: array
+          xml:
+            wrapped: true
+          items:
+            xml:
+              name: link
+            $ref: '#/components/schemas/Link'
+      type: object
+    search_links:
+      properties:
+        _search_string:
+          type: string
+          example: 'django'
+        count:
+          type: integer
+          example: 1
+        next:
+          type: string
+        prev:
+          type: string
+        results:
+          type: array
+          xml:
+            wrapped: true
+          items:
+            xml:
+              name: link
+            $ref: '#/components/schemas/Link'
+      type: object
+    get_tags:
+      properties:
+        tags:
+          type: array
+          xml:
+            wrapped: true
+          items:
+            xml:
+            name: tag
+            $ref: '#/components/schemas/Tag'
+      type: object
+    Tag:
+      properties:
+        name:
+          type: string
+        is_active:
+          type: boolean
+      type: object
+      required: [name]
+      description: Описание тега
+    Link:
+      properties:
+        id:
+          type: integer
+        language:
+          type: string
+          enum: ['RU', 'rus', 'EN', 'eng']
+          example: 'eng'
+        original_url:
+          type: string
+          example: 'https://www.djangoproject.com/'
+        short_link:
+          type: string
+          example: django
+        tags:
+          type: array
+          items:
+            type: string
+            example: 'Django'
+        text:
+          type: string
+          example: 'Django: The web framework for perfectionists with deadlines'
+        timestamp:
+          type: string
+          format: date-time
+      type: object
+      description: Описание ссылки
