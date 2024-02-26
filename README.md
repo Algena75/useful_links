@@ -54,4 +54,4 @@ pip install -r requirements.txt
 ```
 flask run
 ```
-Открыть `http://localhost:5000/`. Документация на API доступна по адресу `http://127.0.0.1:5000/api/docs`.
+Открыть ` http://127.0.0.1:5000/ `. Документация на API доступна по адресу ` http://127.0.0.1:5000/api/docs `.

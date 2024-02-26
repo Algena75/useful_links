@@ -13,37 +13,28 @@ paths:
     post:
       tags:
         - link
-      parameters:
-        - name: tags
-          in: query
-          description: Введите теги через запятую
-          required: false
-          schema:
-            type: string
-        - name: original_url
-          in: query
-          description: Введите уникальный url
-          required: true
-          schema:
-            type: string
-        - name: description
-          in: query
-          description: Описание ссылки
-          required: true
-          schema:
-            type: string
-        - name: short_link
-          in: query
-          description: Введите уникальный идентификатор
-          required: false
-          schema:
-            type: string
-        - name: language
-          in: query
-          description: Введите язык ресурса
-          required: true
-          schema:
-            enum: ['rus', 'eng']
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                tags:
+                  type: string
+                  description: Введите теги через запятую
+                original_url:
+                  type: string
+                  description: Введите уникальный URL
+                description:
+                  type: string
+                  description: Введите описание ссылки
+                short_link:
+                  type: string
+                  description: Введите уникальный идентификатор
+                language:
+                  enum: ['rus', 'eng']
+                  description: Выберите язык ресурса
+              required: [original_url, language, description]
       responses:
         '201':
           content:
@@ -66,9 +57,15 @@ paths:
                 Недопустимая ссылка:
                   value:
                     message: "Неправильный URL"
+                Дублирующаяся ссылка:
+                  value:
+                    message: "Такая ссылка уже есть!"
                 Отсутствует обязательное поле:
                   value:
                     message: '"original url" является обязательным полем!'
+                Дублирующееся описание:
+                  value:
+                    message: "Такое описание уже есть!"
           description: Not found
       summary: Create link
     get:
@@ -150,7 +147,7 @@ paths:
           description: Not found
       summary: Get Url
 
-  /api/links/{link_id}:
+  /api/links/{link_id}/:
     delete:
       tags:
         - link
@@ -183,7 +180,7 @@ paths:
           description: Not found
       summary: Get tags
 
-  /api/tags/{tag_name}:
+  /api/tags/{tag_name}/:
     post:
       tags:
         - tag

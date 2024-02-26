@@ -1,6 +1,7 @@
 from datetime import datetime
-from flask import url_for
 from urllib.parse import urljoin
+
+from flask import url_for
 
 from . import db
 
@@ -27,9 +28,14 @@ class PaginatedAPIMixin(object):
         return data
 
 
-link_tag = db.Table('link_tag',
-    db.Column('link_id', db.Integer, db.ForeignKey('links.id'), primary_key=True),
-    db.Column('tag_id', db.Integer, db.ForeignKey('tags.id'), primary_key=True)
+link_tag = db.Table(
+    'link_tag',
+    db.Column(
+        'link_id', db.Integer, db.ForeignKey('links.id'), primary_key=True
+    ),
+    db.Column(
+        'tag_id', db.Integer, db.ForeignKey('tags.id'), primary_key=True
+    )
 )
 
 
@@ -39,14 +45,14 @@ class Tag(db.Model):
     name = db.Column(db.String(128))
     is_active = db.Column(db.Boolean, default=False)
     links = db.relationship('Link', secondary=link_tag, back_populates='tags')
-    
+
     def __repr__(self):
         return f'<Tag {self.name}>'
-    
+
     def to_dict(self):
         return dict(
-            name = self.name,
-            is_active = self.is_active
+            name=self.name,
+            is_active=self.is_active
         )
 
 
@@ -65,13 +71,13 @@ class Link(PaginatedAPIMixin, db.Model):
 
     def to_dict(self):
         return dict(
-            id = self.id,
-            original = self.original,
-            short = urljoin('http://localhost:5000/', self.short),
-            tags = [tag.name for tag in self.tags],
-            text = self.text,
-            timestamp = self.timestamp,
-            lang = self.lang
+            id=self.id,
+            original=self.original,
+            short=urljoin('http://localhost:5000/', self.short),
+            tags=[tag.name for tag in self.tags],
+            text=self.text,
+            timestamp=self.timestamp,
+            lang=self.lang
         )
 
     def from_dict(self, data):
