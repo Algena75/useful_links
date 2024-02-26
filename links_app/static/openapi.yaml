@@ -159,6 +159,14 @@ paths:
           required: true
       responses:
         '204':
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: Запись удалена
+                type: object
           description: Successful deletion
         '404':
           description: Not found

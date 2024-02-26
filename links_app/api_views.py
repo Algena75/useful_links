@@ -60,7 +60,7 @@ def delete_opinion(id):
         raise InvalidAPIUsage('Запись не найдена', HTTPStatus.NOT_FOUND)
     db.session.delete(link)
     db.session.commit()
-    return 'Запись удалена', HTTPStatus.NO_CONTENT
+    return jsonify({'message': 'Запись удалена'}), HTTPStatus.NO_CONTENT
 
 
 @app.route('/api/tags/', methods=['GET'])
