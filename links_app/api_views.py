@@ -1,12 +1,11 @@
 from http import HTTPStatus
 
 from flask import jsonify, request
-from sqlalchemy import func
 
 from . import app, db
 from .error_handlers import InvalidAPIUsage
 from .models import Link, Tag
-from .utils import change_tag_is_active
+from .utils import change_tag_is_active, create_new_link
 from .validators import validate_link, validate_search_string
 
 
@@ -18,7 +17,7 @@ def add_record():
         if Tag.query.filter_by(is_active=True).count() > 0:
             links = Link.to_collection_dict(
                 db.session.query(Link).join(Link.tags).filter(
-                    Tag.is_active==True
+                    Tag.is_active == 1
                 ), page, per_page, '.add_record', filters=True
             )
         else:
@@ -28,7 +27,10 @@ def add_record():
         if not links:
             raise InvalidAPIUsage('Записей не найдено', HTTPStatus.NOT_FOUND)
         return jsonify(links), HTTPStatus.OK
-    data = request.get_json()
+    if 'multipart' in request.content_type:
+        data = request.form.to_dict()
+    else:
+        data = request.get_json()
     data = validate_link(data)
     new_record = Link(
         original=data.get('original_url'),
@@ -36,21 +38,10 @@ def add_record():
         text=data.get('description'),
         lang=data.get('language')
     )
-    tags =data.get('tags') if data.get('tags') else 'Python'
-    tags =[tag.strip() for tag in tags.split(',')]
-    for tag in tags:
-        tag_in_db = db.session.query(Tag).filter(
-            func.lower(Tag.name)==func.lower(tag)
-        ).first()
-        if tag_in_db:
-            new_record.tags.append(tag_in_db)
-        else:
-            new_tag = Tag(name=tag)
-            db.session.add(new_tag)
-            db.session.flush()
-            new_record.tags.append(new_tag)
-    db.session.add(new_record)
-    db.session.commit()
+    tags = data.get('tags') if data.get('tags') else 'Python'
+    new_record = create_new_link(new_record, tags)
+    data['tags'] = [x.name for x in new_record.tags]
+    data['id'] = new_record.id
     return jsonify(data), HTTPStatus.CREATED
 
 
@@ -64,10 +55,12 @@ def get_url(short_id):
 
 @app.route('/api/links/<int:id>/', methods=['DELETE'])
 def delete_opinion(id):
-    link = Link.query.get_or_404(id)
+    link = Link.query.filter_by(id=id).first()
+    if not link:
+        raise InvalidAPIUsage('Запись не найдена', HTTPStatus.NOT_FOUND)
     db.session.delete(link)
     db.session.commit()
-    return '', HTTPStatus.NO_CONTENT
+    return 'Запись удалена', HTTPStatus.NO_CONTENT
 
 
 @app.route('/api/tags/', methods=['GET'])

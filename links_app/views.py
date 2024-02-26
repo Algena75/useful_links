@@ -1,4 +1,4 @@
-from flask import abort, flash, redirect, render_template, request, url_for
+from flask import redirect, render_template, request, url_for
 
 from . import app, db
 from .forms import AddLinkForm, SearchForm
@@ -16,7 +16,7 @@ def index_view():
         )
     else:
         link_items = (
-            db.session.query(Link).join(Link.tags).filter(Tag.is_active==True)
+            db.session.query(Link).join(Link.tags).filter(Tag.is_active == 1)
             .paginate(page=page, per_page=10, error_out=False)
         )
     form = AddLinkForm()
@@ -24,7 +24,14 @@ def index_view():
     if form.submit_1.data and form.validate():
         form, wrong = validate_form(form)
         if not wrong:
-            create_new_link(form)
+            link = Link(
+                original=form.original_link.data,
+                short=form.custom_id.data,
+                text=form.link_description.data,
+                lang=form.text_lang.data
+            )
+            tags = form.link_tags.data if form.link_tags.data else 'Python'
+            create_new_link(link, tags)
             return redirect(url_for('index_view'))
     return render_template(
         'links.html',
@@ -58,8 +65,7 @@ def search():
     link_items = Link.query.filter(
         Link.text.contains(search_string)
     ).paginate(page=page, per_page=10, error_out=False)
-    found = True if len(link_items.items)>0 else False
-        
+    found = True if len(link_items.items) > 0 else False
     form = AddLinkForm()
     return render_template(
         'search.html',
@@ -70,6 +76,7 @@ def search():
         found=found,
         tags=Tag.query.all()
     )
+
 
 @app.route('/api/docs')
 def get_docs():

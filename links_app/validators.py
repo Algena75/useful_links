@@ -1,11 +1,12 @@
 import operator
 import re
 from http import HTTPStatus
+
 from flask import flash
 
 from .error_handlers import InvalidAPIUsage
-from .models import Link, Tag
-from .utils import get_unique_short_id, ARRAY, LANG_CHOICES
+from .models import Link
+from .utils import ARRAY, LANG_CHOICES, get_unique_short_id
 
 
 def validate_hostname(hostname):
@@ -74,8 +75,12 @@ def validate_link(data):
     if 'original_url' not in data:
         raise InvalidAPIUsage('\"original_url\" является обязательным полем!')
     data['original_url'] = validate_url(data['original_url'])
+    if Link.query.filter_by(original=data['original_url']).first():
+        raise InvalidAPIUsage('Такая ссылка уже есть!')
     if 'description' not in data:
         raise InvalidAPIUsage('\"description\" является обязательным полем!')
+    if Link.query.filter_by(text=data['description']).first():
+        raise InvalidAPIUsage('Такое описание уже есть!')
     if data.get('language'):
         if data.get('language') not in list(operator.concat(*LANG_CHOICES)):
             raise InvalidAPIUsage(
@@ -89,8 +94,6 @@ def validate_link(data):
             raise InvalidAPIUsage(f'Имя "{short_id}" уже занято.')
     else:
         data['short_link'] = get_unique_short_id()
-    if not data.get('tags'):
-        data['tags'] = ['Python']
     return data
 
 
